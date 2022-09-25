@@ -82,8 +82,8 @@ function meta:getSprite(texture)
 			quad = {
 				x / self.resolution,
 				y / self.resolution,
-				(x + w) / self.resolution,
-				(y + h) / self.resolution
+				w / self.resolution,
+				h / self.resolution
 			},
 			width = w,
 			height = h,
@@ -108,10 +108,10 @@ function meta:getQuad(sprite, quad)
 		local x, y, w, h = quad:getViewport()
 		local tw, th = quad:getTextureDimensions()
 		sprite.quads[quad] = {
-			x / tw * (q[3] - q[1]) + q[1],
-			y / th * (q[4] - q[2]) + q[2],
-			(x + w) / tw * (q[3] - q[1]) + q[1],
-			(y + h) / th * (q[4] - q[2]) + q[2]
+			x / tw * q[3] + q[1],
+			y / th * q[4] + q[2],
+			w / tw * q[3],
+			h / th * q[4]
 		}
 	end
 	return sprite.quads[quad]
@@ -153,9 +153,9 @@ function meta:addSprite(sprite, quad, x, y, r, sx, sy, ox, oy, kx, ky)
 	v4.y = t[6] * sprite.height + t[8]
 	
 	v1.u, v1.v, v1.r, v1.g, v1.b, v1.a = quad[1], quad[2], self.color[1], self.color[2], self.color[3], self.color[4]
-	v2.u, v2.v, v2.r, v2.g, v2.b, v2.a = quad[3], quad[2], self.color[1], self.color[2], self.color[3], self.color[4]
-	v3.u, v3.v, v3.r, v3.g, v3.b, v3.a = quad[3], quad[4], self.color[1], self.color[2], self.color[3], self.color[4]
-	v4.u, v4.v, v4.r, v4.g, v4.b, v4.a = quad[1], quad[4], self.color[1], self.color[2], self.color[3], self.color[4]
+	v2.u, v2.v, v2.r, v2.g, v2.b, v2.a = quad[1] + quad[3], quad[2], self.color[1], self.color[2], self.color[3], self.color[4]
+	v3.u, v3.v, v3.r, v3.g, v3.b, v3.a = quad[1] + quad[3], quad[2] + quad[4], self.color[1], self.color[2], self.color[3], self.color[4]
+	v4.u, v4.v, v4.r, v4.g, v4.b, v4.a = quad[1], quad[2] + quad[4], self.color[1], self.color[2], self.color[3], self.color[4]
 	
 	self.size = self.size + 1
 	self.dirty = true
