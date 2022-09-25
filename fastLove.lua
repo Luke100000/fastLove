@@ -159,14 +159,14 @@ function meta:addSprite(p, quad, x, y, r, sx, sy, ox, oy, kx, ky)
 	self.dirty = true
 end
 
-function meta:render()
+function meta:render(...)
 	if self.size > 0 then
 		if self.dirty then
 			self.mesh:setVertices(self.byteData)
 			self.dirty = false
 		end
 		self.mesh:setDrawRange(1, self.size * 6)
-		love.graphics.draw(self.mesh)
+		love.graphics.draw(self.mesh, ...)
 	end
 end
 
