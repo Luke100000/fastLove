@@ -103,6 +103,9 @@ function meta:getSprite(texture)
 end
 
 function meta:getQuad(sprite, quad)
+	if not quad then
+		return sprite.quad
+	end
 	if not sprite.quads[quad] then
 		local q = sprite.quad
 		local x, y, w, h = quad:getViewport()
