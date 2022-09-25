@@ -13,6 +13,8 @@ love.window.setVSync(0)
 
 local w, h = love.graphics.getDimensions()
 
+local delta = 0
+
 local guns = {
 	{ "ship_gun_dual_gray", -36, -26, 17, 32, math.pi / 4 * 3 },
 	{ "ship_gun_dual_gray", -36 + 70, -26, 17, 32, -math.pi / 4 * 3 },
@@ -25,7 +27,7 @@ local guns = {
 	{ "ship_gun_dual_gray", 0, 75, 17, 32, 0 },
 }
 
-local ships = 3000
+local ships = 1000
 
 local function drawFastLove()
 	fastLove:origin()
@@ -51,7 +53,7 @@ local function drawFastLove()
 	fastLove:render()
 	fastLove:clear()
 	
-	love.graphics.printf(love.timer.getFPS(), 0, h / 2, w, "center")
+	love.graphics.printf(string.format("%.1f", 1 / delta), 0, h / 2, w, "center")
 	love.graphics.printf("FastLove", 0, h / 2 + 15, w, "center")
 end
 
@@ -78,12 +80,13 @@ local function drawLove()
 	end
 	
 	love.graphics.origin()
-	love.graphics.printf(love.timer.getFPS(), 0, h / 2, w, "center")
-	love.graphics.printf("Love2d draw()", 0, h / 2 + 15, w, "center")
+	love.graphics.printf(string.format("%.1f", 1 / delta), 0, h / 2, w, "center")
+	love.graphics.printf("Love2d draw()" .. tostring(jit.status()), 0, h / 2 + 15, w, "center")
 end
 
 local quads = {}
-local function getQuad(_, q)
+local function getQuad(s, quad)
+	local q = quad and fastLove:getQuad(s) or s.quad
 	if not quads[q] then
 		quads[q] = love.graphics.newQuad(
 				q[1] * fastLove.resolution, q[2] * fastLove.resolution,
@@ -118,12 +121,15 @@ local function drawSpritebatches()
 	spritebatch:clear()
 	
 	love.graphics.origin()
-	love.graphics.printf(love.timer.getFPS(), 0, h / 2, w, "center")
+	love.graphics.printf(string.format("%.1f", 1 / delta), 0, h / 2, w, "center")
 	love.graphics.printf("Love2d Spritebatch", 0, h / 2 + 15, w, "center")
 end
 
 local mode = 1
 function love.draw()
+	w, h = love.graphics.getDimensions()
+	local dt = math.min(1, love.timer.getDelta())
+	delta = delta * (1 - dt) + love.timer.getDelta() * dt
 	if mode == 1 then
 		drawFastLove()
 	elseif mode == 2 then
@@ -143,3 +149,6 @@ function love.keypressed(key)
 	end
 end
 
+function love.mousepressed()
+	mode = (mode + 1) % 3 + 1
+end

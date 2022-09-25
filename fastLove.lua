@@ -68,7 +68,7 @@ local function findChunk(space, w, h)
 	end
 end
 
-function meta:getSprite(texture, quad)
+function meta:getSprite(texture)
 	if not self.atlas[texture] then
 		--find free chunk
 		local w, h = texture:getDimensions()
@@ -99,9 +99,11 @@ function meta:getSprite(texture, quad)
 		love.graphics.pop()
 	end
 	
-	local p = self.atlas[texture]
-	
-	if quad and not p.quads[quad] then
+	return self.atlas[texture]
+end
+
+function meta:getQuad(p, quad)
+	if not p.quads[quad] then
 		local q = p.quad
 		local x, y, w, h = quad:getViewport()
 		local tw, th = quad:getTextureDimensions()
@@ -112,18 +114,18 @@ function meta:getSprite(texture, quad)
 			(y + h) / th * (q[4] - q[2]) + q[2]
 		}
 	end
-	
-	return p, quad and p.quads[quad] or p.quad
+	return p.quads[quad]
 end
 
 function meta:addQuad(texture, quad, x, y, r, sx, sy, ox, oy, kx, ky)
-	local p, q = self:getSprite(texture, quad)
+	local p = self:getSprite(texture)
+	local q = self:getQuad(p, quad)
 	self:addSprite(p, q, x, y, r, sx, sy, ox, oy, kx, ky)
 end
 
 function meta:add(texture, x, y, r, sx, sy, ox, oy, kx, ky)
-	local p, q = self:getSprite(texture)
-	self:addSprite(p, q, x, y, r, sx, sy, ox, oy, kx, ky)
+	local p = self:getSprite(texture)
+	self:addSprite(p, p.quad, x, y, r, sx, sy, ox, oy, kx, ky)
 end
 
 function meta:addSprite(p, quad, x, y, r, sx, sy, ox, oy, kx, ky)

@@ -3,6 +3,8 @@
 Automatic texture atlas creation and spritebatch renderer, outperforming the inbuilt spritebatches.
 It also supports viewport transforms.
 
+Requires JIT, else it will perform bad. Like, really bad.
+
 # Usage
 
 ```lua
