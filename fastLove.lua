@@ -102,33 +102,33 @@ function meta:getSprite(texture)
 	return self.atlas[texture]
 end
 
-function meta:getQuad(p, quad)
-	if not p.quads[quad] then
-		local q = p.quad
+function meta:getQuad(sprite, quad)
+	if not sprite.quads[quad] then
+		local q = sprite.quad
 		local x, y, w, h = quad:getViewport()
 		local tw, th = quad:getTextureDimensions()
-		p.quads[quad] = {
+		sprite.quads[quad] = {
 			x / tw * (q[3] - q[1]) + q[1],
 			y / th * (q[4] - q[2]) + q[2],
 			(x + w) / tw * (q[3] - q[1]) + q[1],
 			(y + h) / th * (q[4] - q[2]) + q[2]
 		}
 	end
-	return p.quads[quad]
+	return sprite.quads[quad]
 end
 
 function meta:addQuad(texture, quad, x, y, r, sx, sy, ox, oy, kx, ky)
-	local p = self:getSprite(texture)
-	local q = self:getQuad(p, quad)
-	self:addSprite(p, q, x, y, r, sx, sy, ox, oy, kx, ky)
+	local sprite = self:getSprite(texture)
+	local q = self:getQuad(sprite, quad)
+	self:addSprite(sprite, q, x, y, r, sx, sy, ox, oy, kx, ky)
 end
 
 function meta:add(texture, x, y, r, sx, sy, ox, oy, kx, ky)
-	local p = self:getSprite(texture)
-	self:addSprite(p, p.quad, x, y, r, sx, sy, ox, oy, kx, ky)
+	local sprite = self:getSprite(texture)
+	self:addSprite(sprite, sprite.quad, x, y, r, sx, sy, ox, oy, kx, ky)
 end
 
-function meta:addSprite(p, quad, x, y, r, sx, sy, ox, oy, kx, ky)
+function meta:addSprite(sprite, quad, x, y, r, sx, sy, ox, oy, kx, ky)
 	if self.size >= self.capacity then
 		self:resize()
 	end
@@ -143,14 +143,14 @@ function meta:addSprite(p, quad, x, y, r, sx, sy, ox, oy, kx, ky)
 	v1.x = t[4]
 	v1.y = t[8]
 	
-	v2.x = t[1] * p.width + t[4]
-	v2.y = t[5] * p.width + t[8]
+	v2.x = t[1] * sprite.width + t[4]
+	v2.y = t[5] * sprite.width + t[8]
 	
-	v3.x = t[1] * p.width + t[2] * p.height + t[4]
-	v3.y = t[5] * p.width + t[6] * p.height + t[8]
+	v3.x = t[1] * sprite.width + t[2] * sprite.height + t[4]
+	v3.y = t[5] * sprite.width + t[6] * sprite.height + t[8]
 	
-	v4.x = t[2] * p.height + t[4]
-	v4.y = t[6] * p.height + t[8]
+	v4.x = t[2] * sprite.height + t[4]
+	v4.y = t[6] * sprite.height + t[8]
 	
 	v1.u, v1.v, v1.r, v1.g, v1.b, v1.a = quad[1], quad[2], self.color[1], self.color[2], self.color[3], self.color[4]
 	v2.u, v2.v, v2.r, v2.g, v2.b, v2.a = quad[3], quad[2], self.color[1], self.color[2], self.color[3], self.color[4]
