@@ -210,38 +210,54 @@ function meta:reset()
 		height = self.resolution,
 		free = true,
 	}
+	
+	self.byteData = false
+	self.capacity = 1
+	self:resize()
 end
 
 function meta:resize()
-	local oldMesh = self.mesh
 	self.capacity = self.capacity * 2
 	
+	local oldByteData = self.byteData
+	local oldVertexMapByteData = self.vertexMapByteData
+	local oldVertex = self.vertices
+	local oldIndices = self.indices
+	
+	--create
 	self.byteData = love.data.newByteData(ffi.sizeof("vertex") * self.capacity * 4)
+	self.vertexMapByteData = love.data.newByteData(ffi.sizeof("uint32_t") * self.capacity * 6)
+	
+	--provide access to data
 	self.vertices = ffi.cast("vertex*", self.byteData:getFFIPointer())
+	self.indices = ffi.cast("uint32_t*", self.vertexMapByteData:getFFIPointer())
+	
+	--copy old part
+	if oldByteData and oldVertexMapByteData then
+		ffi.copy(self.vertices, oldVertex, ffi.sizeof("vertex") * self.capacity * 4 / 2)
+		ffi.copy(self.indices, oldIndices, ffi.sizeof("uint32_t") * self.capacity * 6 / 2)
+	end
+	
+	--new mesh
 	self.mesh = love.graphics.newMesh({
 		{ "VertexPosition", "float", 2 },
 		{ "VertexTexCoord", "float", 2 },
 		{ "VertexColor", "byte", 4 },
 	}, self.byteData, "triangles", "static")
 	
+	--set atlas
 	self.mesh:setTexture(self.image)
 	
-	local vertexMap = { }
-	for i = 0, self.mesh:getVertexCount() / 4 - 1 do
-		vertexMap[i * 6 + 1] = i * 4 + 1
-		vertexMap[i * 6 + 2] = i * 4 + 2
-		vertexMap[i * 6 + 3] = i * 4 + 3
-		vertexMap[i * 6 + 4] = i * 4 + 1
-		vertexMap[i * 6 + 5] = i * 4 + 3
-		vertexMap[i * 6 + 6] = i * 4 + 4
+	--create rest of index map
+	for i = oldByteData and (self.capacity / 2 - 1) or 0, self.capacity - 1 do
+		self.indices[i * 6 + 0] = i * 4 + 0
+		self.indices[i * 6 + 1] = i * 4 + 1
+		self.indices[i * 6 + 2] = i * 4 + 2
+		self.indices[i * 6 + 3] = i * 4 + 0
+		self.indices[i * 6 + 4] = i * 4 + 2
+		self.indices[i * 6 + 5] = i * 4 + 3
 	end
-	self.mesh:setVertexMap(vertexMap)
-	
-	if oldMesh then
-		for i = 1, oldMesh:getVertexCount() do
-			self.mesh:setVertex(i, oldMesh:getVertex(i))
-		end
-	end
+	self.mesh:setVertexMap(self.vertexMapByteData, "uint32")
 end
 
 return function(resolution)
@@ -261,7 +277,6 @@ return function(resolution)
 	}, { __index = meta })
 	
 	fl:reset()
-	fl:resize()
 	
 	return fl
 end
