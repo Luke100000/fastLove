@@ -85,12 +85,12 @@ local function drawLove()
 end
 
 local quads = {}
-local function getQuad(s, quad)
-	local q = quad and fastLove:getQuad(s) or s.quad
+local function getQuad(texture, quad)
+	local q = fastLove:getQuad(texture, quad)
 	if not quads[q] then
 		quads[q] = love.graphics.newQuad(
 				q[1] * fastLove.resolution, q[2] * fastLove.resolution,
-				(q[3] - q[1]) * fastLove.resolution, (q[4] - q[2]) * fastLove.resolution,
+				q[3] * fastLove.resolution, q[4] * fastLove.resolution,
 				fastLove.resolution, fastLove.resolution
 		)
 	end
@@ -107,11 +107,11 @@ local function drawSpritebatches()
 		local x, y = math.cos(r) * dist * 1.5, math.sin(r) * dist
 		local size = 0.5
 		
-		spritebatch:add(getQuad(fastLove:getSprite(textures.ship_large_body)), x, y, r, size, size, 61, 184)
+		spritebatch:add(getQuad(textures.ship_large_body), x, y, r, size, size, 61, 184)
 		for _, gun in ipairs(guns) do
 			local rot = (gun[6] or 0) + r
-			spritebatch:add(getQuad(fastLove:getSprite(textures["ship_gun_base_dark"])), gun[2] + x, gun[3] + y, 0, size, size, 12, 12)
-			spritebatch:add(getQuad(fastLove:getSprite(textures[gun[1]])), gun[2] + x, gun[3] + y, rot, size, size, gun[4], gun[5])
+			spritebatch:add(getQuad(textures["ship_gun_base_dark"]), gun[2] + x, gun[3] + y, 0, size, size, 12, 12)
+			spritebatch:add(getQuad(textures[gun[1]]), gun[2] + x, gun[3] + y, rot, size, size, gun[4], gun[5])
 		end
 	end
 	

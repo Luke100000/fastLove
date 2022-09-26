@@ -102,7 +102,9 @@ function meta:getSprite(texture)
 	return self.atlas[texture]
 end
 
-function meta:getQuad(sprite, quad)
+--gets the (x, y, w, h) quad on the atlas for a given texture
+function meta:getQuad(texture, quad)
+	local sprite = self:getSprite(texture)
 	if not quad then
 		return sprite.quad
 	end
@@ -122,7 +124,7 @@ end
 
 function meta:addQuad(texture, quad, x, y, r, sx, sy, ox, oy, kx, ky)
 	local sprite = self:getSprite(texture)
-	local q = self:getQuad(sprite, quad)
+	local q = self:getQuad(texture, quad)
 	self:addSprite(sprite, q, x, y, r, sx, sy, ox, oy, kx, ky)
 end
 
