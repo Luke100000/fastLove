@@ -110,14 +110,23 @@ function meta:getQuad(texture, quad)
 	end
 	if not sprite.quads[quad] then
 		local q = sprite.quad
-		local x, y, w, h = quad:getViewport()
-		local tw, th = quad:getTextureDimensions()
-		sprite.quads[quad] = {
-			x / tw * q[3] + q[1],
-			y / th * q[4] + q[2],
-			w / tw * q[3],
-			h / th * q[4]
-		}
+		if type(quad) == "table" then
+			sprite.quads[quad] = {
+				quad[1] / quad[3] * q[3] + q[1],
+				quad[2] / quad[4] * q[4] + q[2],
+				1 / quad[3] * q[3],
+				1 / quad[4] * q[4]
+			}
+		else
+			local x, y, w, h = quad:getViewport()
+			local tw, th = quad:getTextureDimensions()
+			sprite.quads[quad] = {
+				x / tw * q[3] + q[1],
+				y / th * q[4] + q[2],
+				w / tw * q[3],
+				h / th * q[4]
+			}
+		end
 	end
 	return sprite.quads[quad]
 end
