@@ -112,8 +112,8 @@ function meta:getQuad(texture, quad)
 		local q = sprite.quad
 		if type(quad) == "table" then
 			sprite.quads[quad] = {
-				quad[1] / quad[3] * q[3] + q[1],
-				quad[2] / quad[4] * q[4] + q[2],
+				(quad[1] - 1) / quad[3] * q[3] + q[1],
+				(quad[2] - 1) / quad[4] * q[4] + q[2],
 				1 / quad[3] * q[3],
 				1 / quad[4] * q[4]
 			}
