@@ -153,7 +153,7 @@ end
 function meta:getLayer(texture, quad)
 	local sprite = self:getSprite(texture)
 	if quad then
-		return sprite.layer + (quad[1] - 1) * quad[3] + quad[2] - 1
+		return sprite.layer + (quad[1] - 1) * quad[4] + quad[2] - 1
 	else
 		return sprite.layer
 	end
