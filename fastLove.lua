@@ -72,31 +72,48 @@ function meta:getSprite(texture)
 	if not self.atlas[texture] then
 		--find free chunk
 		local w, h = texture:getDimensions()
-		local x, y = findChunk(self.space, w, h)
-		
-		assert(x, "Atlas full!")
+		local x, y = 0, 0
+		if not self.layers then
+			x, y = findChunk(self.space, w, h)
+			assert(x, "Atlas full!")
+		end
 		
 		--register texture
 		self.atlas[texture] = {
 			quads = { },
-			quad = {
+			quad = self.layers and { 0, 0, 1, 1 } or {
 				x / self.resolution,
 				y / self.resolution,
 				w / self.resolution,
 				h / self.resolution
 			},
+			layer = self.layer + 1,
 			width = w,
 			height = h,
 			x = x,
 			y = y,
 		}
 		
+		--render
 		love.graphics.push("all")
 		love.graphics.reset()
 		love.graphics.setBlendMode("replace", "premultiplied")
-		love.graphics.setCanvas(self.image)
-		love.graphics.draw(texture, x, y)
+		if self.layers then
+			for x = 0, w - 1, self.resolution do
+				for y = 0, h - 1, self.resolution do
+					self.layer = self.layer + 1
+					assert(self.layer < self.layers, "Maximum layers exceeded!")
+					love.graphics.setCanvas(self.image, self.layer)
+					love.graphics.draw(texture, -x, -y)
+				end
+			end
+		else
+			love.graphics.setCanvas(self.image)
+			love.graphics.draw(texture, x, y)
+		end
 		love.graphics.pop()
+		
+		self.imageDirty = true
 	end
 	
 	return self.atlas[texture]
@@ -129,6 +146,17 @@ function meta:getQuad(texture, quad)
 		end
 	end
 	return sprite.quads[quad]
+end
+
+--gets the layer on an array texture for a given texture
+--the quad needs to be simple (int x, int y, int w, int h) and should have the same dimensions as the actual texture
+function meta:getLayer(texture, quad)
+	local sprite = self:getSprite(texture)
+	if quad then
+		return sprite.layer + (quad[1] - 1) * quad[3] + quad[2] - 1
+	else
+		return sprite.layer
+	end
 end
 
 function meta:addQuad(texture, quad, x, y, r, sx, sy, ox, oy, kx, ky)
@@ -181,9 +209,20 @@ function meta:render(...)
 			self.mesh:setVertices(self.byteData)
 			self.dirty = false
 		end
+		self:getImage()
 		self.mesh:setDrawRange(1, self.size * 6)
 		love.graphics.draw(self.mesh, ...)
 	end
+end
+
+--a getter which also makes sure mipmaps are rendered
+function meta:getImage()
+	if self.imageDirty then
+		--todo this is surprisingly unacceptable slow, consider realtime approach
+		self.image:generateMipmaps()
+		self.imageDirty = false
+	end
+	return self.image
 end
 
 function meta:translate(x, y)
@@ -276,20 +315,29 @@ function meta:resize()
 	self.mesh:setVertexMap(self.vertexMapByteData, "uint32")
 end
 
-return function(resolution)
+return function(resolution, layers)
 	assert(type(resolution) == "number", "Missing atlas resolution")
 	
-	local image = love.graphics.newCanvas(resolution, resolution)
+	local image
+	if layers then
+		image = love.graphics.newCanvas(resolution, resolution, layers, { type = "array", mipmaps = "manual" })
+	else
+		image = love.graphics.newCanvas(resolution, resolution, { mipmaps = "manual" })
+	end
+	
 	local fl = setmetatable({
 		resolution = resolution,
 		capacity = 1,
+		layers = layers,
+		layer = 0,
 		image = image,
 		transform = mat4:getIdentity(),
 		size = 0,
+		dirty = false,
+		imageDirty = false,
 		color = { 255, 255, 255, 255 },
 		stack = { },
 		atlas = { },
-		dirty = false
 	}, { __index = meta })
 	
 	fl:reset()

@@ -4,7 +4,7 @@ local fastLove = require("fastLove")(512)
 
 local textures = { }
 for _, v in ipairs(love.filesystem.getDirectoryItems("textures")) do
-	textures[v:sub(1, -5)] = love.graphics.newImage("textures/" .. v)
+	textures[v:sub(1, -5)] = love.graphics.newImage("textures/" .. v, { mipmaps = true })
 end
 
 love.graphics.setBackgroundColor(0, 84 / 255, 108 / 255)
