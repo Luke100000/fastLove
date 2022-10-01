@@ -1,4 +1,5 @@
 local mat4 = _G.mat4 or require("libs/luaMatrices/mat4")
+require("libs/luaMatrices/mat4Extended")(mat4)
 
 local ffi = _G.ffi or require("ffi")
 
