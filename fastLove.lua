@@ -100,12 +100,12 @@ function meta:getSprite(texture)
 		love.graphics.reset()
 		love.graphics.setBlendMode("replace", "premultiplied")
 		if self.layers then
-			for x = 0, w - 1, self.resolution do
-				for y = 0, h - 1, self.resolution do
+			for px = 0, w - 1, self.resolution do
+				for py = 0, h - 1, self.resolution do
 					self.layer = self.layer + 1
 					assert(self.layer < self.layers, "Maximum layers exceeded!")
 					love.graphics.setCanvas(self.image, self.layer)
-					love.graphics.draw(texture, -x, -y)
+					love.graphics.draw(texture, -px, -py)
 				end
 			end
 		else
